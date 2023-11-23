@@ -1,0 +1,37 @@
+{
+  "supervisionUrls": ["ws://localhost:8080/ocpp"],
+  "supervisionUrlDistribution": "round-robin",
+  "log": {
+    "file": "logs/combined.log",
+    "errorFile": "logs/error.log",
+    "maxFiles": 7,
+    "statisticsInterval": 0
+  },
+  "worker": {
+    "processType": "workerSet"
+  },
+  "performanceStorage": {
+    "enabled": false,
+    "type": "jsonfile"
+  },
+  "uiServer": {
+    "enabled": true,
+    "type": "ws",
+    "options": {
+      "host": "localhost",
+      "port": 8011
+    },
+    "authentication": {
+      "enabled": false,
+      "type": "basic-auth",
+      "username": "admin",
+      "password": "admin"
+    }
+  },
+  "stationTemplateUrls": [
+    {
+      "file": "wallbox.json",
+      "numberOfStations": 4
+    }
+  ]
+}

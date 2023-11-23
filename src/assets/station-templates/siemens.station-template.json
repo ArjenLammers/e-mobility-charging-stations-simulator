@@ -1,7 +1,7 @@
 {
   "idTagsFile": "idtags.json",
   "baseName": "CS-SIEMENS",
-  "fixedName": true,
+  "fixedName": false,
   "chargePointModel": "SIEMENSXX213",
   "chargePointVendor": "SIEMENS",
   "power": 44160,
@@ -14,7 +14,7 @@
       {
         "key": "MeterValuesSampledData",
         "readonly": false,
-        "value": "Energy.Active.Import.Register"
+        "value": "SoC,Energy.Active.Import.Register,Voltage"
       },
       {
         "key": "MeterValueSampleInterval",
@@ -49,7 +49,7 @@
     ]
   },
   "AutomaticTransactionGenerator": {
-    "enable": false,
+    "enable": true,
     "minDuration": 60,
     "maxDuration": 80,
     "minDelayBetweenTwoTransactions": 15,
@@ -62,11 +62,16 @@
   "Connectors": {
     "0": {},
     "1": {
-      "bootStatus": "Unavailable",
       "MeterValues": [
         {
           "unit": "Wh",
           "context": "Sample.Periodic"
+        },
+        {
+          "unit": "Percent",
+          "context": "Sample.Periodic",
+          "measurand": "SoC",
+          "location": "EV"
         }
       ]
     },
@@ -75,6 +80,12 @@
         {
           "context": "Sample.Periodic",
           "unit": "Wh"
+        },
+        {
+          "unit": "Percent",
+          "context": "Sample.Periodic",
+          "measurand": "SoC",
+          "location": "EV"
         }
       ]
     }
