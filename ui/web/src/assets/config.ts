@@ -3,7 +3,7 @@ import type { BaseConfig } from '@/types';
 const config: BaseConfig = {
   uiServer: {
     host: 'localhost',
-    port: 8080,
+    port: 8011,
     protocol: 'ui0.0.1',
   },
 };
