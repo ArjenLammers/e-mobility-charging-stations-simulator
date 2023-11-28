@@ -55,16 +55,15 @@ export class Bootstrap extends EventEmitter {
   private static instance: Bootstrap | null = null;
   public numberOfChargingStations!: number;
   public numberOfChargingStationTemplates!: number;
-  private workerImplementation: WorkerAbstract<ChargingStationWorkerData> | null;
-  private readonly uiServer: AbstractUIServer | null;
-  private readonly storage!: Storage;
+  private workerImplementation?: WorkerAbstract<ChargingStationWorkerData>;
+  private readonly uiServer?: AbstractUIServer;
+  private storage?: Storage;
   private numberOfStartedChargingStations!: number;
   private readonly version: string = version;
   private initializedCounters: boolean;
   private started: boolean;
   private starting: boolean;
   private stopping: boolean;
-  private readonly workerScript: string;
 
   private constructor() {
     super();
@@ -79,24 +78,16 @@ export class Bootstrap extends EventEmitter {
     this.stopping = false;
     this.initializedCounters = false;
     this.initializeCounters();
-    this.workerImplementation = null;
-    this.workerScript = join(
-      dirname(fileURLToPath(import.meta.url)),
-      `ChargingStationWorker${extname(fileURLToPath(import.meta.url))}`,
-    );
     this.uiServer = UIServerFactory.getUIServerImplementation(
       Configuration.getConfigurationSection<UIServerConfiguration>(ConfigurationSection.uiServer),
     );
-    const performanceStorageConfiguration =
-      Configuration.getConfigurationSection<StorageConfiguration>(
-        ConfigurationSection.performanceStorage,
-      );
-    performanceStorageConfiguration.enabled === true &&
-      (this.storage = StorageFactory.getStorage(
-        performanceStorageConfiguration.type!,
-        performanceStorageConfiguration.uri!,
-        this.logPrefix(),
-      ));
+    this.on(ChargingStationWorkerMessageEvents.started, this.workerEventStarted);
+    this.on(ChargingStationWorkerMessageEvents.stopped, this.workerEventStopped);
+    this.on(ChargingStationWorkerMessageEvents.updated, this.workerEventUpdated);
+    this.on(
+      ChargingStationWorkerMessageEvents.performanceStatistics,
+      this.workerEventPerformanceStatistics,
+    );
     Configuration.configurationChangeCallback = async () => Bootstrap.getInstance().restart(false);
   }
 
@@ -117,7 +108,18 @@ export class Bootstrap extends EventEmitter {
         );
         this.initializeWorkerImplementation(workerConfiguration);
         await this.workerImplementation?.start();
-        await this.storage?.open();
+        const performanceStorageConfiguration =
+          Configuration.getConfigurationSection<StorageConfiguration>(
+            ConfigurationSection.performanceStorage,
+          );
+        if (performanceStorageConfiguration.enabled === true) {
+          this.storage = StorageFactory.getStorage(
+            performanceStorageConfiguration.type!,
+            performanceStorageConfiguration.uri!,
+            this.logPrefix(),
+          );
+          await this.storage?.open();
+        }
         Configuration.getConfigurationSection<UIServerConfiguration>(ConfigurationSection.uiServer)
           .enabled === true && this.uiServer?.start();
         // Start ChargingStation object instance in worker thread
@@ -191,9 +193,10 @@ export class Bootstrap extends EventEmitter {
           }
         }
         await this.workerImplementation?.stop();
-        this.workerImplementation = null;
+        delete this.workerImplementation;
         this.uiServer?.stop();
         await this.storage?.close();
+        delete this.storage;
         this.resetCounters();
         this.initializedCounters = false;
         this.started = false;
@@ -243,21 +246,23 @@ export class Bootstrap extends EventEmitter {
           ? Math.round(this.numberOfChargingStations / (availableParallelism() * 1.5))
           : 1;
     }
-    this.workerImplementation === null &&
-      (this.workerImplementation = WorkerFactory.getWorkerImplementation<ChargingStationWorkerData>(
-        this.workerScript,
-        workerConfiguration.processType!,
-        {
-          workerStartDelay: workerConfiguration.startDelay,
-          elementStartDelay: workerConfiguration.elementStartDelay,
-          poolMaxSize: workerConfiguration.poolMaxSize!,
-          poolMinSize: workerConfiguration.poolMinSize!,
-          elementsPerWorker: elementsPerWorker ?? (workerConfiguration.elementsPerWorker as number),
-          poolOptions: {
-            messageHandler: this.messageHandler.bind(this) as (message: unknown) => void,
-          },
+    this.workerImplementation = WorkerFactory.getWorkerImplementation<ChargingStationWorkerData>(
+      join(
+        dirname(fileURLToPath(import.meta.url)),
+        `ChargingStationWorker${extname(fileURLToPath(import.meta.url))}`,
+      ),
+      workerConfiguration.processType!,
+      {
+        workerStartDelay: workerConfiguration.startDelay,
+        elementStartDelay: workerConfiguration.elementStartDelay,
+        poolMaxSize: workerConfiguration.poolMaxSize!,
+        poolMinSize: workerConfiguration.poolMinSize!,
+        elementsPerWorker: elementsPerWorker ?? (workerConfiguration.elementsPerWorker as number),
+        poolOptions: {
+          messageHandler: this.messageHandler.bind(this) as (message: unknown) => void,
         },
-      ));
+      },
+    );
   }
 
   private messageHandler(
@@ -273,19 +278,15 @@ export class Bootstrap extends EventEmitter {
     try {
       switch (msg.event) {
         case ChargingStationWorkerMessageEvents.started:
-          this.workerEventStarted(msg.data as ChargingStationData);
           this.emit(ChargingStationWorkerMessageEvents.started, msg.data as ChargingStationData);
           break;
         case ChargingStationWorkerMessageEvents.stopped:
-          this.workerEventStopped(msg.data as ChargingStationData);
           this.emit(ChargingStationWorkerMessageEvents.stopped, msg.data as ChargingStationData);
           break;
         case ChargingStationWorkerMessageEvents.updated:
-          this.workerEventUpdated(msg.data as ChargingStationData);
           this.emit(ChargingStationWorkerMessageEvents.updated, msg.data as ChargingStationData);
           break;
         case ChargingStationWorkerMessageEvents.performanceStatistics:
-          this.workerEventPerformanceStatistics(msg.data as Statistics);
           this.emit(
             ChargingStationWorkerMessageEvents.performanceStatistics,
             msg.data as Statistics,
@@ -346,7 +347,7 @@ export class Bootstrap extends EventEmitter {
   };
 
   private workerEventPerformanceStatistics = (data: Statistics) => {
-    this.storage.storePerformanceStatistics(data) as void;
+    this.storage?.storePerformanceStatistics(data) as void;
   };
 
   private initializeCounters() {
