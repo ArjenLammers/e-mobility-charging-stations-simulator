@@ -84,6 +84,7 @@ enum MeterValueFormat {
 
 export interface OCPP16SampledValue extends JsonObject {
   value: string;
+  minimumValueFromMaxRatio?: number;
   unit?: MeterValueUnit;
   context?: MeterValueContext;
   measurand?: OCPP16MeterValueMeasurand;

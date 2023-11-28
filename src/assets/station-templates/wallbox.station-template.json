@@ -90,7 +90,8 @@
         {
           "unit": "W",
           "measurand": "Power.Active.Import",
-          "context": "Sample.Periodic"
+          "context": "Sample.Periodic",
+          "minimumValueFromMaxRatio": 0.9
         },
         {
           "unit": "V",

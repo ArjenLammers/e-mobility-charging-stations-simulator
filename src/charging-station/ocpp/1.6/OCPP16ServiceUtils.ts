@@ -287,7 +287,10 @@ export class OCPP16ServiceUtils extends OCPPServiceUtils {
       const connectorMaximumPowerPerPhase = Math.round(
         connectorMaximumAvailablePower / chargingStation.getNumberOfPhases(),
       );
-      const connectorMinimumPower = Math.round(powerSampledValueTemplate.minimumValue ?? 0);
+      const connectorMinimumPower = powerSampledValueTemplate.minimumValueFromMaxRatio
+        ? Math.round(connectorMaximumPower * powerSampledValueTemplate.minimumValueFromMaxRatio)
+        : Math.round(powerSampledValueTemplate.minimumValue ?? 0);
+
       const connectorMinimumPowerPerPhase = Math.round(
         connectorMinimumPower / chargingStation.getNumberOfPhases(),
       );
