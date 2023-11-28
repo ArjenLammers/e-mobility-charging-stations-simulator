@@ -1,0 +1,118 @@
+{
+  "idTagsFile": "idtags.json",
+  "idTagDistribution": "connector-affinity",
+  "baseName": "WALLBOX",
+  "fixedName": false,
+  "chargePointModel": "CPB1-W-2-4",
+  "chargePointVendor": "Wall Box Chargers",
+  "power": 11000,
+  "powerUnit": "W",
+  "powerSharedByConnectors": true,
+  "numberOfPhases": 1,
+  "currentOutType": "AC",
+  "numberOfConnectors": 1,
+  "randomConnectors": false,
+  "supervisionUser": "charge",
+  "supervisionPassword": "Mendix123!",
+  "Configuration": {
+    "configurationKey": [
+      {
+        "key": "MeterValuesSampledData",
+        "readonly": false,
+        "value": "Current.Import,Current.Offered,Energy.Active.Import.Register,Frequency,Power.Active.Import,Voltage,Power.Offered,Energy.Active.Import.Interval,Temperature"
+      },
+      {
+        "key": "MeterValueSampleInterval",
+        "readonly": false,
+        "value": "30"
+      },
+      {
+        "key": "SupportedFeatureProfiles",
+        "readonly": true,
+        "value": "Core,FirmwareManagement,LocalAuthListManagement,SmartCharging,RemoteTrigger,Reservation"
+      },
+      {
+        "key": "LocalAuthListEnabled",
+        "readonly": false,
+        "value": "false"
+      },
+      {
+        "key": "AuthorizeRemoteTxRequests",
+        "readonly": false,
+        "value": "false"
+      },
+      {
+        "key": "WebSocketPingInterval",
+        "readonly": false,
+        "value": "60"
+      },
+      {
+        "key": "ReserveConnectorZeroSupported",
+        "readonly": false,
+        "value": "false"
+      }
+    ]
+  },
+  "AutomaticTransactionGenerator": {
+    "enable": true,
+    "minDuration": 60,
+    "maxDuration": 1800,
+    "minDelayBetweenTwoTransactions": 5,
+    "maxDelayBetweenTwoTransactions": 30,
+    "probabilityOfStart": 0.8,
+    "stopAfterHours": 7200,
+    "stopOnConnectionFailure": false,
+    "requireAuthorize": true
+  },
+  "Connectors": {
+    "0": {},
+    "1": {
+      "bootStatus": "Available",
+      "MeterValues": [
+        {
+          "unit": "Wh",
+          "context": "Sample.Periodic"
+        },
+        {
+          "unit": "A",
+          "measurand": "Current.Import"
+        },
+        {
+          "unit": "A",
+          "measurand": "Current.Offered",
+          "context": "Sample.Periodic"
+        },
+        {
+          "unit": "Hz",
+          "measurand": "Frequency",
+          "context": "Sample.Periodic"
+        },
+        {
+          "unit": "W",
+          "measurand": "Power.Active.Import",
+          "context": "Sample.Periodic"
+        },
+        {
+          "unit": "V",
+          "measurand": "Voltage",
+          "context": "Sample.Periodic"
+        },
+        {
+          "unit": "W",
+          "measurand": "Power.Offered",
+          "context": "Sample.Periodic"
+        },
+        {
+          "unit": "Hz",
+          "measurand": "Energy.Active.Import.Interval",
+          "context": "Sample.Periodic"
+        },
+        {
+          "unit": "C",
+          "measurand": "Temperature",
+          "context": "Sample.Periodic"
+        }
+      ]
+    }
+  }
+}
