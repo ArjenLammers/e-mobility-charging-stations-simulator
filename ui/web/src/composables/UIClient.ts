@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from 'uuid';
 import {
   ProcedureName,
   type ProtocolResponse,
@@ -149,7 +150,7 @@ export class UIClient {
         this.openWS();
       }
       if (this.ws.readyState === WebSocket.OPEN) {
-        const uuid = crypto.randomUUID();
+        const uuid = uuidv4();
         const msg = JSON.stringify([uuid, command, data]);
         const sendTimeout = setTimeout(() => {
           this.deleteResponseHandler(uuid);
