@@ -614,7 +614,14 @@ export const getDefaultVoltageOut = (
 export const getIdTagsFile = (stationInfo: ChargingStationInfo): string | undefined => {
   return (
     stationInfo.idTagsFile &&
-    join(dirname(fileURLToPath(import.meta.url)), 'assets', basename(stationInfo.idTagsFile))
+    join(
+      dirname(fileURLToPath(import.meta.url)),
+      'assets',
+      basename(stationInfo.idTagsFile).replaceAll(
+        '#{stationId}',
+        `${stationInfo.chargingStationId}`,
+      ),
+    )
   );
 };
 

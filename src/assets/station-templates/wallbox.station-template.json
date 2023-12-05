@@ -1,5 +1,5 @@
 {
-  "idTagsFile": "idtags.json",
+  "idTagsFile": "idtags-#{stationId}.json",
   "idTagDistribution": "connector-affinity",
   "baseName": "WALLBOX",
   "fixedName": false,
